@@ -20,4 +20,23 @@ export default class BranchDAO{
             return {error:e};
         }
     }
+
+    static async getBranchData(){
+        let cursor;
+        try{
+            cursor = await branch
+                .find()
+        }catch(e){
+            console.error(`Unable to get data,${e}`);
+            return {branchData:[]};
+        }
+        
+        try{
+            const branchData = await cursor.toArray();
+            return {branchData}
+        }catch(e){
+            console.error(`Unable to convert to array ${e}`);
+        }
+        return {branchData:[]};
+    }
 }

@@ -9,4 +9,16 @@ export default class BranchController{
             console.error(e);
         }
     }
+
+    static async apiGetBranchData(req,res,next){
+        try{
+            const {branchData} = await BranchDAO.getBranchData();
+            let response = {
+                branches : branchData
+            }
+            res.json(response);
+        }catch(e){
+            res.status(500).json({error:e.message})
+        }
+    }
 }

@@ -11,6 +11,7 @@ router.route("/deleteStudent").delete(StudentCtrl.apiDeleteStudentData);
 router.route("/editStudent").put(StudentCtrl.apiUpdateStudentData);
 
 router.route("/addBranch").post(BranchCtrl.apiAddBranchData);
+router.route("/getBranch").get(BranchCtrl.apiGetBranchData);
 
 router.route("/addUser").post(SignCtrl.apiAddSignup);
 router.route("/getUser").get(SignCtrl.apiGetSignup);
