@@ -39,4 +39,25 @@ export default class BranchDAO{
         }
         return {branchData:[]};
     }
+
+    static async deleteBranchData(branchId){
+        try {
+          return await branch.deleteOne({_id:OjeectId(branchId)});
+        }catch(e){
+          console.error(`Unable to delete studentData: ${e}`);
+          return {error: e};
+        }
+    }
+
+    static async updateBranchData(data){
+        try{
+          const updateResponse = await branch.updateOne(
+            {_id : OjeectId(data.firebaseId)},
+            { $set: data} 
+          )
+          return updateResponse
+        }catch(e){
+          console.error(`Unable to update data: ${e}`);
+        }
+      }
 }
