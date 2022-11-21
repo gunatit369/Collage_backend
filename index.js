@@ -4,6 +4,7 @@ import dotenv from "dotenv"
 import StudentDAO from "./dao/studentDAO.js"
 import SignDAO from "./dao/signupDAO.js"
 import BranchDAO from "./dao/branchDAO.js"
+import FacultyDAO from "./dao/facultyDAO.js"
 
 dotenv.config()
 const MongoClient = mongodb.MongoClient
@@ -21,6 +22,7 @@ MongoClient.connect(
     process.exit(1)
   })
   .then(async client => {
+    FacultyDAO.injectDB(client)
     StudentDAO.injectDB(client);
     SignDAO.injectDB(client);
     BranchDAO.injectDB(client); 
