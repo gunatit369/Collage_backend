@@ -18,7 +18,9 @@ export default class StudentDAO{
     
     static async addStudentData(data){
         try{
-          return await student.insertOne(data);
+          return await student.insertOne({fname:data.fname,
+                                        mname:data.mname,sname:data.sname,address:data.address,enroll:data.enroll
+                                        ,course:data.course,sem:data.sem,pcontact:data.pcontact,scontact:data.scontact});
           // console.log(data);
           // const options = {ordered:true};
           // return await student.insertMany(data,options);
@@ -57,10 +59,10 @@ export default class StudentDAO{
       }
     } 
     
-    static async updateStudentData(data){
+    static async updateStudentData(data,studentId){
       try{
         const updateResponse = await student.updateOne(
-          {_id : OjeectId(data.firebaseId)},
+          {_id : OjeectId(data.id)},
           { $set: data} 
         )
         return updateResponse

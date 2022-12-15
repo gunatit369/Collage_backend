@@ -52,6 +52,30 @@ export default class FacultyController {
     }
 
     static async apiGetFaculty(req,res,next){
-        
+        const {facultyData} = await facultyDAO.getFaculty();
+        let response = {
+            faculty : facultyData
+        }
+        res.json(response);
+    }
+
+    static async apiUpdateFaculty(req,res,next){
+        try{
+            await facultyDAO.updateFacultyData(req.body);
+            res.json({status:"success"});
+        }catch(e){
+            res.status(500).json({error:e.message});
+        }
+    }
+
+    static async apiDeleteFaculty(req,res,next){
+        try{
+            const facultyId = req.query.id;
+            // console.log(studentId);
+            await facultyDAO.deleteFacultyData(facultyId);
+            res.json({status:"success"});
+        }catch(e){
+            res.status(500).json({error:e.message});
+        }
     }
 }

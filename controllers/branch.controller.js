@@ -40,4 +40,45 @@ export default class BranchController{
             res.status(500).json({error:e.message});
         }
     }
+
+    static async apiBranchName(req,res,next){
+        const branchName = await BranchDAO.getBranchName()
+        let response = {
+            branchName : branchName 
+        }
+        res.json(response);
+    }
+
+    static async apiSemester(req,res,next){
+        try {
+            let branchName = req.params.branchName
+            const semester = await BranchDAO.getSemester(branchName)
+            let response = {
+                sem :semester
+            }
+            res.json(response)
+        }catch(e){
+            res.status(500).json({error:e.message});
+        }
+    }
+
+    static async apiSubject(req,res,next){
+        let branchName = req.params.branchName
+        let semester = req.params.semester
+        const subjects= await BranchDAO.getSubjects(branchName,semester)
+        let response = {
+            subject :subjects
+        }
+        res.json(response)
+    }
+
+    static async apiFacultyId(req,res,next){
+        try {
+            let facultyName = req.params.facultyName
+            const id = await BranchDAO.getFacultyId(facultyName);
+            res.send(id)
+        } catch (e) {
+            res.status(500).json({error:e.message});
+        }
+    }
 }
