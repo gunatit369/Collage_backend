@@ -3,6 +3,7 @@ let branch
 let faculty
 let allocate
 let id;
+const objectId = mongodb.ObjectId
 export default class BranchDAO{
     static async injectDB(conn){
         if (branch){
@@ -18,7 +19,7 @@ export default class BranchDAO{
 
     static async addBranchData(data){
         try{
-            return await branch.insertOne(data);
+            return await branch.insertOne({branchName:data.branchname,semesters:data.semesters});
         }catch(e){
             console.error(`Unable to add student data: ${e}`);
             return {error:e};
@@ -45,12 +46,12 @@ export default class BranchDAO{
     }
 
     static async deleteBranchData(branchId){
-        try {
-          return await branch.deleteOne({_id:OjeectId(branchId)});
-        }catch(e){
-          console.error(`Unable to delete studentData: ${e}`);
-          return {error: e};
-        }
+      try {
+        return await branch.deleteOne({_id:objectId(branchId)});
+      }catch(e){
+        console.error(`Unable to delete studentData: ${e}`);
+        return {error: e};
+      }
     }
 
     static async updateBranchData(data){
@@ -78,7 +79,7 @@ export default class BranchDAO{
    static async getSemester(bname){
     let semester = [];
     try{
-       semester = await branch.distinct("semesters.sem",{branchname:bname});
+      semester = await branch.distinct("semesters.sem",{branchname:bname});
       // semester = await branch.distinct("totalSemvalues",{branchname:bname});
       return semester
     }catch(e){
@@ -93,32 +94,47 @@ export default class BranchDAO{
 
     try {
       allocated_sub = await allocate.distinct("subject",{facultyId:id})
-      console.log({allocated_sub});
+      try {
+        cursor = await branch.find({branchname:bname})
+        let subjects = await cursor.toArray();
+        subjects = subjects[0].semesters[sem-1].subject;
+        if (allocated_sub.length > 0){
+          for (const element of allocated_sub){
+            for (const element2 of subjects){
+              if (element === element2){
+                subjects.splice(subjects.indexOf(element),1)
+                break;
+              }
+            }
+          }
+        }
+        return subjects
+      }
+      catch (error) {
+        console.log(error);        
+      } 
     }catch(error){
       console.error(error);
     }
     // let sem = parseInt(semester)
-    try {
-      let remain_sub = [];
-      cursor = await branch.find({branchname:bname})
-      let subjects = await cursor.toArray();
-      subjects = subjects[0].semesters[sem-1].subject;
-      if (allocated_sub.length > 0){
-        for (const element of allocated_sub){
-          for (const element2 of subjects){
-            if (element === element2){
-              subjects.splice(subjects.indexOf(element),1)
-              break;
-            }
-          }
-        }
-      }
-
-      // console.log({subjects});
-      return subjects
-    } catch (error) {
-      console.log(error);        
-    }  
+    // try {
+    //   cursor = await branch.find({branchname:bname})
+    //   let subjects = await cursor.toArray();
+    //   subjects = subjects[0].semesters[sem-1].subject;
+    //   if (allocated_sub.length > 0){
+    //     for (const element of allocated_sub){
+    //       for (const element2 of subjects){
+    //         if (element === element2){
+    //           subjects.splice(subjects.indexOf(element),1)
+    //           break;
+    //         }
+    //       }
+    //     }
+    //   }
+    //   return subjects
+    // } catch (error) {
+    //   console.log(error);        
+    // }  
     // try {
     //   cursor = await branch.find({branchname:bname},{"semesters.sem_name":1,"semesters.subject":1});
     //   let subjects = await cursor.toArray();
@@ -137,6 +153,44 @@ export default class BranchDAO{
       return id;
     } catch (error) {
       console.log(error);
+    }
+  }
+
+  static async getNonAllocatedSubjects(facultyId,branchName,semester,subject){
+    let allocated_subjects = await allocate.find({facultyId:objectId(facultyId),branch:branchName,semester:parseInt(semester)}).project({subject:1,_id:0}).toArray()
+    let findBranch = await branch.find({branchname:branchName}).toArray()
+    let subjects = await branch.aggregate([
+      {
+        $project: {
+          _id: 0,
+          appleQuantities: {
+            $filter: {
+              input: findBranch[0].semesters,
+              as: "item",
+              cond: { $eq: [ "$$item.sem", parseInt(semester) ] }
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          appleQuantities: "$appleQuantities.subject"
+        }
+      }
+    ]).next()
+    subjects = subjects.appleQuantities.flat();
+    if (subjects.length > allocated_subjects.length){
+      subjects.forEach((element,index) => {
+        allocated_subjects.forEach((element2) => {
+          if (element === element2.subject){
+            subjects.splice(index,1)
+          }
+        })
+      });
+      subjects.push(subject)
+      return subjects
+    }else{
+      return [subject]
     }
   }
 }

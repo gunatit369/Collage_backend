@@ -6,6 +6,7 @@ import SignDAO from "./dao/signupDAO.js"
 import BranchDAO from "./dao/branchDAO.js"
 import FacultyDAO from "./dao/facultyDAO.js"
 import AllocateDAO from "./dao/allocateFacultyDAO.js"
+import AttendanceDAO from "./dao/attendanceDAO.js"
 
 dotenv.config()
 const MongoClient = mongodb.MongoClient
@@ -28,6 +29,7 @@ MongoClient.connect(
     SignDAO.injectDB(client);
     BranchDAO.injectDB(client); 
     AllocateDAO.injectDB(client);
+    AttendanceDAO.injectDB(client);
     app.listen(port, () => {
       console.log(`listening on port ${port}`)
     })

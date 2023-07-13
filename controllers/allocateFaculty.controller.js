@@ -4,7 +4,8 @@ export default class AllocationController {
 
     static async apiAddAllocationData(req,res,next){
         try {
-            await AllocateDAO.addFacultyAllocation(req.body);
+            const response =  await AllocateDAO.addFacultyAllocation(req.body);
+            res.json(response.insertedId)
         } catch (error) {
             console.log(error);
         }
@@ -13,10 +14,7 @@ export default class AllocationController {
     static async apiGetAllocationData(req,res,next){
         try{
             const {fAllocation} = await AllocateDAO.getFacultyAllocation();
-            let response = {
-                fAllocation : fAllocation
-            }
-            res.json(response);
+            res.json(fAllocation);
         }catch(e){
             res.status(500).json({error:e.message})
         }
@@ -24,8 +22,8 @@ export default class AllocationController {
 
     static async apiUpdateAllocationData(req,res,next){
         try{
-            await AllocateDAO.updateFacultyAllocation(req.body);
-            res.json({status:"success"});
+            const response = await AllocateDAO.updateFacultyAllocation(req.body);
+            res.json(response.acknowledged)
         }catch(e){
             console.log(e);
         }
@@ -34,9 +32,8 @@ export default class AllocationController {
     static async apiDeleteAllocationData(req,res,next){
         try{
             const AllocationId = req.query.id;
-            // console.log(studentId);
-            await AllocateDAO.deleteFacultyAllocation(AllocationId);
-            res.json({status:"success"});
+            const response = await AllocateDAO.deleteFacultyAllocation(AllocationId);
+            res.json(response.acknowledged);
         }catch(e){
             res.status(500).json({error:e.message});
         }

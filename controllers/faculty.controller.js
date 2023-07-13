@@ -6,7 +6,6 @@ export default class FacultyController {
         // if (req.query.branch){
         //     filters.branch = req.query.branch
         // }
-        console.log(req.body);
         const branchData = await facultyDAO.getBranchData();
 
         let response = {
@@ -44,8 +43,8 @@ export default class FacultyController {
 
     static async apiAddFaculty(req,res,next){
         try {
-            await facultyDAO.addFaculty(req.body);
-            res.json({status:"success"}) 
+            const response = await facultyDAO.addFaculty(req.body);
+            res.json(response.insertedId) 
         } catch (error) {
             res.status(500).json({error:e.message})
         }
@@ -53,16 +52,13 @@ export default class FacultyController {
 
     static async apiGetFaculty(req,res,next){
         const {facultyData} = await facultyDAO.getFaculty();
-        let response = {
-            faculty : facultyData
-        }
-        res.json(response);
+        res.json(facultyData);
     }
 
     static async apiUpdateFaculty(req,res,next){
         try{
-            await facultyDAO.updateFacultyData(req.body);
-            res.json({status:"success"});
+            const response = await facultyDAO.updateFacultyData(req.body);
+            res.json(response.acknowledged)
         }catch(e){
             res.status(500).json({error:e.message});
         }
@@ -71,9 +67,8 @@ export default class FacultyController {
     static async apiDeleteFaculty(req,res,next){
         try{
             const facultyId = req.query.id;
-            // console.log(studentId);
-            await facultyDAO.deleteFacultyData(facultyId);
-            res.json({status:"success"});
+            const response = await facultyDAO.deleteFacultyData(facultyId);
+            res.json(response.acknowledged);
         }catch(e){
             res.status(500).json({error:e.message});
         }

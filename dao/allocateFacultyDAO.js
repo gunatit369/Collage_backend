@@ -20,7 +20,7 @@ export default class AllocateDAO {
     static async addFacultyAllocation(data){
       id = new ObjectId(data.id)
       try{
-          return await allocate_Faculty.insertOne({facultyId:id,facultyName:data.facultyName,
+          return await allocate_Faculty.insertOne({facultyId:id,
               branch : data.branch, semester: data.semester, subject : data.subject});
       }catch(e){
           console.error(`Unable to add data: ${e}`);
@@ -30,6 +30,10 @@ export default class AllocateDAO {
 
     static async getFacultyAllocation(){
         let cursor;
+        let facultyId = [];
+        let fAllocation;
+        let facultyNames;
+
         try{
             cursor = await allocate_Faculty
                 .find()
@@ -39,21 +43,40 @@ export default class AllocateDAO {
         }
         
         try{
-            const fAllocation = await cursor.toArray();
-            return {fAllocation}
+            fAllocation = await cursor.toArray();
+            fAllocation.forEach(element => {
+              facultyId.push(element.facultyId)
+            });
+            // console.log({facultyId});
+            // return {fAllocation}
         }catch(e){
             console.error(`Unable to convert to array ${e}`);
         }
-        return {fAllocation:[]};
+
+        try {
+          facultyNames = await faculty.find({_id : {$in : facultyId}}).project({fname:1}).toArray()
+        } catch (error) {
+          console.error(`Unable to get the faculty Names ${error}`);
+        }
+
+        fAllocation.forEach((element,index) => {
+          facultyNames.forEach(element2 => {
+            if (element.facultyId.equals(element2._id)){
+              fAllocation[index] = {...fAllocation[index],"facultyName":element2.fname}
+            }
+          }
+          )
+        })
+        return {fAllocation}
     }
 
     static async updateFacultyAllocation(data){
+      // console.log({data});
       id = new ObjectId(data.facultyId);
         try{
           const updateResponse = await allocate_Faculty.updateOne(
-            {_id : Id(data.id)},
-            { $set: {facultyId:id,facultyName:data.facultyName,
-              branch : data.branch, semester: data.semester, subject : data.subject}})
+            {_id : Id(data._id)},
+            { $set: {facultyId:id,branch : data.branch, semester: data.semester, subject : data.subject}})
           return updateResponse
         }catch(e){
           console.error(`Unable to update data: ${e}`);

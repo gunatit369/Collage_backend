@@ -5,8 +5,8 @@ export default class StudentController{
         try{
             // console.log(req.body);
             // var data = Object.entries(req.body)
-            await StudentDAO.addStudentData(req.body);
-            res.json({status:"success"}) 
+            const response = await StudentDAO.addStudentData(req.body);
+            res.json(response.insertedId) 
         }catch(e){
             res.status(500).json({error:e.message})
         }
@@ -14,18 +14,14 @@ export default class StudentController{
 
     static async apiGetStudentData(req,res,next){
         const {studentData} = await StudentDAO.getStudentData();
-        let response = {
-            students : studentData
-        }
-        res.json(response);
+        res.json(studentData);
     }
 
     static async apiDeleteStudentData(req,res,next){
         try{
             const studentId = req.query.id;
-            // console.log(studentId);
-            await StudentDAO.deleteStudentData(studentId);
-            res.json({status:"success"});
+            const response = await StudentDAO.deleteStudentData(studentId);
+            res.json(response.acknowledged);
         }catch(e){
             res.status(500).json({error:e.message});
         }
@@ -33,8 +29,8 @@ export default class StudentController{
 
     static async apiUpdateStudentData(req,res,next){
         try{
-            await StudentDAO.updateStudentData(req.body);
-            res.json({status:"success"});
+            const response = await StudentDAO.updateStudentData(req.body);
+            res.json(response.acknowledged);
         }catch(e){
             res.status(500).json({error:e.message});
         }
