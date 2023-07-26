@@ -1,6 +1,5 @@
 import e from "express";
 import SignDAO from "../dao/signupDAO.js";
-
 export default class SignController{
     static async apiAddSignup(req,res,next){
         try {
@@ -9,7 +8,7 @@ export default class SignController{
             if (response.insertedId){
                 res.json(response.insertedId);    
             }else{
-                res.json(response)
+                res.json(response);
             }
         } catch (error) {
             res.status(500).json({error:e.message});   
@@ -18,11 +17,11 @@ export default class SignController{
 
     static async apiGetSignup(req,res,next){
         try{
-            const {signUpData} = await SignDAO.getSignup()
+            const {signUpData} = await SignDAO.getSignup();
             let response = {
                 sign : signUpData
             }
-            res.json(response)
+            res.json(response);
         }catch(error){
             res.status(500).json({error:e.message});
         }
@@ -30,10 +29,10 @@ export default class SignController{
 
     static async apiCheckEmailExitance(req,res,next){
         try {
-            const response = await SignDAO.emailExistance(req.body)
-            res.json(response)
+            const response = await SignDAO.emailExistance(req.body);
+            res.json(response);
         } catch (error) {
-            res.status(500).json({error:e.message})
+            res.status(500).json({error:e.message});
         }
     }
 }

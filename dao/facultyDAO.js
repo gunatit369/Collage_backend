@@ -5,11 +5,11 @@ let Allocation_faculty
 export default class facultyDAO {
     static async injectDB(conn) {
       if (faculty) {
-        return
+        return;
       }
       try {
-        faculty = await conn.db(process.env.RESTREVIEWS_NS).collection("Faculty")
-        Allocation_faculty = await conn.db(process.env.RESTREVIEWS_NS).collection("Allocate_Faculty")
+        faculty = await conn.db(process.env.RESTREVIEWS_NS).collection("Faculty");
+        Allocation_faculty = await conn.db(process.env.RESTREVIEWS_NS).collection("Allocate_Faculty");
       } catch (e) {
         console.error(
           `Unable to establish a collection handle in studentDAO: ${e}`,
@@ -17,63 +17,7 @@ export default class facultyDAO {
       }
     }
 
-    static async getBranchData(){    
-      let cursor
-      try{
-          cursor = await faculty
-              .find();
-      }catch(e){
-          console.error(`Unable to issue find command, ${e}`);
-          return { branchData: []}
-      }
-
-      try {
-          const branchData = await cursor.toArray();
-          return {branchData};
-      } catch (error) {
-          console.error(
-              `Unable to convert cursor to array or problem counting documents, ${error}`,
-          )
-      }
-    return {branchData:[]}
-    }
-
-    static async getBranchName(){
-      let branchName = [];
-      try{
-        branchName = await faculty.distinct("branch_name")
-        return branchName
-      }catch(e){
-        console.error("unable to get data");
-      }
-    }
-
-    static async getSemester(bname){
-      let semester = [];
-      try{
-        semester = await faculty.distinct("semesters.sem_name",{branch_name:bname});
-        return semester
-      }catch(e){
-        console.error("unable to get data");
-        console.log(e);
-      }
-    }
-
-    static async getSubjects(semester,bname){
-      let cursor
-      let sem = parseInt(semester)
-      // try {
-      //   cursor = await faculty.find({branch_name:bname,"semesters.sem_name":sem})
-      //   let subjects = await cursor.toArray();
-      //   subjects = subjects[0].semesters[sem-1].subject;
-      //    return subjects
-      // } catch (error) {
-      //   console.log(error);        
-      // }  
-    }
-
     static async addFaculty(data){
-      // console.log({data});
         try{
             return await faculty.insertOne({fname:data.fname,
                                       qulification:data.qulification,
@@ -91,17 +35,15 @@ export default class facultyDAO {
       try{
         cursor = await faculty.find()
       }catch(e){
-        console.error(`Unable to get data,${e}`);
-        return { facultyData:[]};
+        return {error:e};        
       }
 
       try{
         const facultyData = await cursor.toArray();
-        return {facultyData};
+        return facultyData;
       }catch(e){
-        console.error(`Unable to convert to array ${e}`);
+        return {error:e};
       }
-      return {facultyData:[]};
     }
 
     static async updateFacultyData(data){
@@ -112,25 +54,22 @@ export default class facultyDAO {
             qulification:data.qulification,
             expertise:data.expertise,
             experience:data.experience}} 
-        )
-        return updateResponse
+        );
+        return updateResponse;
       }catch(e){
-        console.error(`Unable to update data: ${e}`);
+        return {error:e};
       }
     }
 
     static async deleteFacultyData(facultyId){
-      // console.log({facultyId});
       try {
          await faculty.deleteOne({_id:OjeectId(facultyId)});
           try {
             return await Allocation_faculty.deleteMany({facultyId:OjeectId(facultyId)})
         } catch (error) {
-            console.error(`Unable to delete data: ${e}`);
             return {error: e};    
         }
       }catch(e){
-        console.error(`Unable to delete data: ${e}`);
         return {error: e};
       }
     }

@@ -3,18 +3,20 @@ import StudentDAO from "../dao/studentDAO.js";
 export default class StudentController{
     static async apiAddStudentData(req,res,next){
         try{
-            // console.log(req.body);
-            // var data = Object.entries(req.body)
             const response = await StudentDAO.addStudentData(req.body);
-            res.json(response.insertedId) 
+            res.json(response.insertedId); 
         }catch(e){
-            res.status(500).json({error:e.message})
+            res.status(500).json({error:e.message});
         }
     }
 
     static async apiGetStudentData(req,res,next){
-        const {studentData} = await StudentDAO.getStudentData();
-        res.json(studentData);
+        try {
+            const studentData = await StudentDAO.getStudentData();
+            res.json(studentData);    
+        } catch (error) {
+            res.status(500).json({error:error.message});
+        }
     }
 
     static async apiDeleteStudentData(req,res,next){

@@ -23,7 +23,6 @@ export default class AllocateDAO {
           return await allocate_Faculty.insertOne({facultyId:id,
               branch : data.branch, semester: data.semester, subject : data.subject});
       }catch(e){
-          console.error(`Unable to add data: ${e}`);
           return {error:e};
       }
     }
@@ -36,10 +35,9 @@ export default class AllocateDAO {
 
         try{
             cursor = await allocate_Faculty
-                .find()
+                .find();
         }catch(e){
-            console.error(`Unable to get data,${e}`);
-            return {fAllocation:[]};
+            return {error:e};
         }
         
         try{
@@ -47,16 +45,14 @@ export default class AllocateDAO {
             fAllocation.forEach(element => {
               facultyId.push(element.facultyId)
             });
-            // console.log({facultyId});
-            // return {fAllocation}
         }catch(e){
-            console.error(`Unable to convert to array ${e}`);
+            return {error:e};
         }
 
         try {
-          facultyNames = await faculty.find({_id : {$in : facultyId}}).project({fname:1}).toArray()
+          facultyNames = await faculty.find({_id : {$in : facultyId}}).project({fname:1}).toArray();
         } catch (error) {
-          console.error(`Unable to get the faculty Names ${error}`);
+          return {error:error};
         }
 
         fAllocation.forEach((element,index) => {
@@ -67,20 +63,19 @@ export default class AllocateDAO {
           }
           )
         })
-        return {fAllocation}
+        return fAllocation;
     }
 
     static async updateFacultyAllocation(data){
-      // console.log({data});
       id = new ObjectId(data.facultyId);
-        try{
-          const updateResponse = await allocate_Faculty.updateOne(
-            {_id : Id(data._id)},
-            { $set: {facultyId:id,branch : data.branch, semester: data.semester, subject : data.subject}})
-          return updateResponse
-        }catch(e){
-          console.error(`Unable to update data: ${e}`);
-        }
+      try{
+        const updateResponse = await allocate_Faculty.updateOne(
+          {_id : Id(data._id)},
+          { $set: {facultyId:id,branch : data.branch, semester: data.semester, subject : data.subject}})
+        return updateResponse;
+      }catch(e){
+        return {error:e};
+      }
     }
 
     static async deleteFacultyAllocation(AllocationId){

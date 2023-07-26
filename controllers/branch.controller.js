@@ -6,17 +6,14 @@ export default class BranchController{
             const response = await BranchDAO.addBranchData(req.body);
             res.json(response.insertedId)
         }catch(e){
-            console.error(e);
+            res.status(500).json({error:e.message});
         }
     }
 
     static async apiGetBranchData(req,res,next){
         try{
             const {branchData} = await BranchDAO.getBranchData();
-            let response = {
-                branches : branchData
-            }
-            res.json(response);
+            res.json(branchData);
         }catch(e){
             res.status(500).json({error:e.message})
         }
@@ -25,9 +22,8 @@ export default class BranchController{
     static async apiDeleteBranchData(req,res,next){
         try{
             const BranchId = req.query.id;
-            // console.log(studentId);
-            await BranchDAO.deleteBranchData(BranchId);
-            res.json({status:"success"});
+            const response = await BranchDAO.deleteBranchData(BranchId);
+            res.json(response.acknowledged);
         }catch(e){
             res.status(500).json({error:e.message});
         }
@@ -35,42 +31,41 @@ export default class BranchController{
 
     static async apiUpdateBranchData(req,res,next){
         try{
-            await BranchDAO.updateBranchData(req.body);
-            res.json({status:"success"});
+            const response = await BranchDAO.updateBranchData(req.body);
+            res.json(response.acknowledged);
         }catch(e){
             res.status(500).json({error:e.message});
         }
     }
 
     static async apiBranchName(req,res,next){
-        const branchName = await BranchDAO.getBranchName()
-        // let response = {
-        //     branchName : branchName 
-        // }
-        res.json(branchName);
+        try {
+            const branchName = await BranchDAO.getBranchName()
+            res.json(branchName);
+        } catch (e) {
+            res.status(500).json({error:e.message});
+        }
     }
 
     static async apiSemester(req,res,next){
         try {
-            let branchName = req.params.branchName
-            const semester = await BranchDAO.getSemester(branchName)
-            // let response = {
-            //     sem :semester
-            // }
-            res.json(semester)
+            let branchName = req.params.branchName;
+            const semester = await BranchDAO.getSemester(branchName);
+            res.json(semester);
         }catch(e){
             res.status(500).json({error:e.message});
         }
     }
 
     static async apiSubject(req,res,next){
-        let branchName = req.params.branchName
-        let semester = req.params.semester
-        const subjects= await BranchDAO.getSubjects(branchName,semester)
-        // let response = {
-        //     subject :subjects
-        // }
-        res.json(subjects)
+        try {
+            let branchName = req.params.branchName;
+            let semester = req.params.semester;
+            const subjects= await BranchDAO.getSubjects(branchName,semester);
+            res.json(subjects);
+        } catch (e) {
+            res.status(500).json({error:e.message});
+        }
     }
 
     static async apiFacultyId(req,res,next){
@@ -91,8 +86,8 @@ export default class BranchController{
             const subject = req.params.subject
             const subjects = await BranchDAO.getNonAllocatedSubjects(facultyId,branchName,semester,subject)
             res.json(subjects)
-        } catch (error) {
-            console.log({error});
+        } catch (e) {
+            res.status(500).json({error:e.message});
         }
     }
 }

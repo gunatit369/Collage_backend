@@ -8,9 +8,6 @@ import AttendanceCtrl from "../controllers/attendance.controller.js";
 
 const router = express.Router();
 
-// router.route("/getData").get(AttendanceCtrl.apigetAllocatedFacultyBranch);
-// router.route("/Attendancebranch").get(AttendanceCtrl.apiBranch);
-
 router.route("/addStudents").post(StudentCtrl.apiAddStudentData);
 router.route("/getStudents").get(StudentCtrl.apiGetStudentData);
 router.route("/deleteStudent").delete(StudentCtrl.apiDeleteStudentData);
@@ -20,7 +17,6 @@ router.route("/branch").get(BranchCtrl.apiBranchName);
 router.route("/semester/:branchName").get(BranchCtrl.apiSemester);
 router.route("/subject/:branchName/:semester").get(BranchCtrl.apiSubject);
 router.route("/getNonAllocatedSubjects/:facultyId/:branchName/:semester/:subject").get(BranchCtrl.apiGetNonAllocatedSubjects)
-// router.route("/subject/:branchName").get(BranchCtrl.apiSubject);
 router.route("/id/:facultyName").get(BranchCtrl.apiFacultyId);
 
 router.route("/addAllocation").post(AllocationCtrl.apiAddAllocationData);
@@ -49,6 +45,5 @@ router.route("/getAttendance/:branch/:sem/:subject/:date/:lectureNo").get(Attend
 router.route("/addAttendance").post(AttendanceCtrl.apiAddAttendanceData);
 router.route("/editAttendance").put(AttendanceCtrl.apiUpdateAttendaceData);
 router.route("/report").post(AttendanceCtrl.apiReport)
-
 
 export default router

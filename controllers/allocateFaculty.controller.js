@@ -6,17 +6,17 @@ export default class AllocationController {
         try {
             const response =  await AllocateDAO.addFacultyAllocation(req.body);
             res.json(response.insertedId)
-        } catch (error) {
-            console.log(error);
+        } catch (e) {
+            res.status(500).json({error:e.message});
         }
     }
 
     static async apiGetAllocationData(req,res,next){
         try{
-            const {fAllocation} = await AllocateDAO.getFacultyAllocation();
+            const fAllocation = await AllocateDAO.getFacultyAllocation();
             res.json(fAllocation);
         }catch(e){
-            res.status(500).json({error:e.message})
+            res.status(500).json({error:e.message});
         }
     }
 
@@ -25,7 +25,7 @@ export default class AllocationController {
             const response = await AllocateDAO.updateFacultyAllocation(req.body);
             res.json(response.acknowledged)
         }catch(e){
-            console.log(e);
+            res.status(500).json({error:e.message});
         }
     }
 

@@ -1,7 +1,4 @@
-import mongodb from "mongodb"
-const OjeectId = mongodb.ObjectId
 let signup
-
 export default class SignDAO{
     static async injectDB(conn) {
         if (signup) {
@@ -19,54 +16,38 @@ export default class SignDAO{
     static async emailExistance(data){
       try {
         const cursor = await signup.find({email : data.email}).project({role:1,facultyId:1}).limit(1).toArray();
-        // console.log(cursor);
         if (cursor.length === 1){
           return cursor;
-          // return 
         }else{
-          // return "User Don't not exist";
-          return false
+          return false;
         }
       } catch (error) {
-        console.error(`Unable to find email existance: ${error}`)
+        return {error:error};  
       }
     }
 
     static async addSignup(data){
-      console.log({data});
-        // try{
-        //   const cursor = await signup.find({email : data.email}).limit(1).hasNext();
-        //   if (cursor){
-        //     return cursor
-        //   }else{
-            try {
-              return await signup.insertOne(data)
-            } catch (error) {
-              console.error(`Unable to add user : ${error}`);
-            }
-        //   }
-        // }catch(e){
-        //     console.error(`Unable to find user : ${e}`);
-        //     return {error:e};
-        // }
+      try {
+        return await signup.insertOne(data);
+      } catch (error) {
+        return {error:error}
+      }
     }
 
     static async getSignup(){
         let cursor;
         try{
             cursor = await signup
-              .find()
+              .find();
           }catch(e){
-            console.error(`Unable to get data,${e}`);
-            return { signUpData:[]};
-          }
+            return {error:e};
+        }
     
-          try{
-            const signUpData = await cursor.toArray();
-            return {signUpData};
-          }catch(e){
-            console.error(`Unable to convert to array ${e}`);
-          }
-        return {signUpData:[]};
+        try{
+          const signUpData = await cursor.toArray();
+          return {signUpData};
+        }catch(e){
+          return {error:e};
+        }
     }
 }
