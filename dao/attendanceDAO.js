@@ -6,8 +6,8 @@ let Allocated
 let Attendance
 let Students
 let Allocation_id;
-var facultyId;
-var branchName;
+let facultyId;
+let branchName;
 
 export default class AttendanceDAO {
     static async injectDB(conn) {
@@ -28,13 +28,13 @@ export default class AttendanceDAO {
     }
 
     static async getAllocatedFacultyBranch(id) {
-        let cursor;
         facultyId = id;
         try {
-            cursor = await Allocated.distinct("branch",{facultyId: ObjectId(facultyId)});
-            return cursor;
+            let allocatedBranch = await Allocated.distinct("branch",{facultyId: ObjectId(facultyId)});
+            return allocatedBranch;
         } catch (error) {
-            return {error:error};
+            throw new Error(`Error in getAllocatedFacultyBranch: ${error.message}`);
+            // return {error:error};
         }
     }
 
@@ -73,40 +73,34 @@ export default class AttendanceDAO {
     }
 
     static async searchInAttendance(branch,sem,subject,date,lectureNo){
-        this.getAllocationId(branch,sem,subject)
+        await this.getAllocationId(branch,sem,subject);
         
         let cursor;
-        cursor = Attendance.find({Date:new Date(date)})
-        let Attendancedata = await cursor.toArray()
-        
-        let id = []
-        let status = []
+        cursor = Attendance.find({Date:new Date(date),Allocation_id:objectId(Allocation_id)}).project({_id:1,Attendance:1});
+        let Attendancedata = await cursor.toArray();
+
+        let id = [];
+        let status = [];
         
         if (Attendancedata.length > 0 ){
-            const findAllocationId = Attendancedata.filter(st=>{return st.Allocation_id.equals(Allocation_id)})
-            if (findAllocationId.length > 0){
-                findAllocationId.forEach(element => {
-                    element.Attendance.forEach(lecture =>{
-                        if (lecture.lectureNo === parseInt(lectureNo)){
-                            lecture.PresentAbsent.forEach(studentAttendance => {
-                                id.push(new ObjectId(studentAttendance.studentId))
-                                status.push(studentAttendance.AttendanceStatus)
-                            })
-                        }              
+            Attendancedata.forEach(entry => {
+                const lecture = entry.Attendance.find(lecture => lecture.lectureNo === lectureNo)
+                if (lecture){
+                    lecture.PresentAbsent.forEach(studentAttendance => {
+                        id.push(new ObjectId(studentAttendance.studentId))
+                        status.push(studentAttendance.AttendanceStatus)
                     })
-                })
-                if (id.length === 0){
-                    return this.getAttendanceData(branch,sem)        
-                }else{
-                    let student = await Students.find({_id : {$in : id}}).project({fname:1,_id:1,sname:1}).toArray();
-                    student = student.map((stud,index) => ({...stud,id : index,"AttendanceStatus" : status[index],objectId : findAllocationId[0]._id}))
-                    return student;
-                }
+                }              
+            });
+            if (id.length === 0){
+                return this.getAttendanceData(branch,sem)        
             }else{
-                return this.getAttendanceData(branch,sem)
+                let student = await Students.find({_id : {$in : id}}).project({fname:1,_id:1,sname:1}).toArray();
+                student = student.map((stud,index) => ({...stud,id : index,"AttendanceStatus" : status[index],objectId : Attendancedata[0]._id}));
+                return student;
             }
         }else{
-            return this.getAttendanceData(branch,sem)
+            return this.getAttendanceData(branch,sem);
         }
     }
     
@@ -136,7 +130,6 @@ export default class AttendanceDAO {
             return cursor.result.map((student,index) => ({...student,id : index,"AttendanceStatus":0}))
         } 
         catch(error){
-            console.log(`Can't able to get student for attendance: ${error}`);
             return {error:error};
         }         
     }
@@ -172,10 +165,11 @@ export default class AttendanceDAO {
     static async updateAttendanceData(data){
         data.students = data.students.map(student => {return ({"studentId":ObjectId(student.studentId),"AttendanceStatus":student.AttendanceStatus})})
         try {
-            return await Attendance.updateOne(
+            const updateResponse = await Attendance.updateOne(
                 {_id : ObjectId(data.objectId),"Attendance.lectureNo":data.lectureNo},
                 {$set : {"Attendance.$.PresentAbsent": data.students }}
-            )
+            );
+            return updateResponse;
         } catch (error) {   
             return {error:error};
         }

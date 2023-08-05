@@ -22,7 +22,7 @@ export default class AttendanceController {
 
     static async apiGetFacultySubject(req,res,next){
         try {
-            const sem = req.params.semester;
+            const sem = parseInt(req.params.semester);
             const subjects = await attendanceDAO.getFacultySubject(sem);
             res.json(subjects);
         } catch (error) {
@@ -36,7 +36,7 @@ export default class AttendanceController {
             const sem = req.params.sem;
             const subject = req.params.subject;
             const date = req.params.date;
-            const lectureNo = req.params.lectureNo;
+            const lectureNo = parseInt(req.params.lectureNo);
             const response = await attendanceDAO.searchInAttendance(branch,sem,subject,date,lectureNo);
             res.json(response);    
         } catch (error) {

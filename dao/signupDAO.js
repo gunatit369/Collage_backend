@@ -1,4 +1,6 @@
+import mongodb from "mongodb"
 let signup
+const objectId = mongodb.ObjectId
 export default class SignDAO{
     static async injectDB(conn) {
         if (signup) {
@@ -27,6 +29,7 @@ export default class SignDAO{
     }
 
     static async addSignup(data){
+      data = {...data,facultyId:objectId(data.facultyId)};
       try {
         return await signup.insertOne(data);
       } catch (error) {
@@ -45,7 +48,7 @@ export default class SignDAO{
     
         try{
           const signUpData = await cursor.toArray();
-          return {signUpData};
+          return signUpData;
         }catch(e){
           return {error:e};
         }
